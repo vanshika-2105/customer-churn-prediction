@@ -9,7 +9,11 @@ data["TotalCharges"] = pd.to_numeric(
     data["TotalCharges"],
     errors="coerce"
 )
-
+# Fill missing TotalCharges for customers with zero tenure
+data.loc[
+    data["TotalCharges"].isna() & (data["tenure"] == 0),
+    "TotalCharges"
+] = 0
 # Check the missing values
 print("Missing TotalCharges values:", data["TotalCharges"].isna().sum())
 
