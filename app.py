@@ -56,33 +56,47 @@ with st.form("customer_form"):
 
     st.subheader("Services")
 
+  
     phone_service = st.selectbox("Phone Service?", ["No", "Yes"])
+
+    if phone_service == "No":
+        multiple_lines_options = ["No phone service"]
+    else:
+        multiple_lines_options = ["No", "Yes"]
+
     multiple_lines = st.selectbox(
-        "Multiple Lines",
-        ["No phone service", "No", "Yes"]
+        "Multiple Lines", multiple_lines_options
     )
+
+  
     internet_service = st.selectbox(
         "Internet Service", ["DSL", "Fiber optic", "No"]
     )
 
+    if internet_service == "No":
+        internet_service_options = ["No internet service"]
+    else:
+        internet_service_options = ["No", "Yes"]
+
     online_security = st.selectbox(
-        "Online Security", ["No internet service", "No", "Yes"]
+        "Online Security", internet_service_options
     )
     online_backup = st.selectbox(
-        "Online Backup", ["No internet service", "No", "Yes"]
+        "Online Backup", internet_service_options
     )
     device_protection = st.selectbox(
-        "Device Protection", ["No internet service", "No", "Yes"]
+        "Device Protection", internet_service_options
     )
     tech_support = st.selectbox(
-        "Tech Support", ["No internet service", "No", "Yes"]
+        "Tech Support", internet_service_options
     )
     streaming_tv = st.selectbox(
-        "Streaming TV", ["No internet service", "No", "Yes"]
+        "Streaming TV", internet_service_options
     )
     streaming_movies = st.selectbox(
-        "Streaming Movies", ["No internet service", "No", "Yes"]
+        "Streaming Movies", internet_service_options
     )
+
 
     submitted = st.form_submit_button("Predict Churn")
 
