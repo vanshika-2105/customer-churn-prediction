@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-
+from src.feature_encoder import encode_customer
 # Configure the web page
 st.set_page_config(
     page_title="Customer Churn Prediction",
@@ -101,69 +101,53 @@ with st.form("customer_form"):
     submitted = st.form_submit_button("Predict Churn")
 
 if submitted:
-    # Start with all expected model features set to zero
-    customer = {feature: 0 for feature in feature_names}
 
-    # Numerical features
-    customer["SeniorCitizen"] = int(senior_citizen == "Yes")
-    customer["tenure"] = tenure
-    customer["MonthlyCharges"] = monthly_charges
-    customer["TotalCharges"] = total_charges
+    # Collect customer information
+    customer = {
+        "senior_citizen": senior_citizen,
+        "tenure": tenure,
+        "monthly_charges": monthly_charges,
+        "total_charges": total_charges,
 
-    # Personal features
-    customer["gender_Male"] = int(gender == "Male")
-    customer["Partner_Yes"] = int(partner == "Yes")
-    customer["Dependents_Yes"] = int(dependents == "Yes")
+        "gender": gender,
+        "partner": partner,
+        "dependents": dependents,
 
-    # Phone features
-    customer["PhoneService_Yes"] = int(phone_service == "Yes")
-    customer["MultipleLines_No phone service"] = int(
-        multiple_lines == "No phone service"
-    )
-    customer["MultipleLines_Yes"] = int(multiple_lines == "Yes")
+        "phone_service": phone_service,
+        "multiple_lines": multiple_lines,
 
-    # Internet features
-    customer["InternetService_Fiber optic"] = int(
-        internet_service == "Fiber optic"
-    )
-    customer["InternetService_No"] = int(internet_service == "No")
+        "internet_service": internet_service,
+        "online_security": online_security,
+        "online_backup": online_backup,
+        "device_protection": device_protection,
+        "tech_support": tech_support,
+        "streamingtv": streaming_tv,
+        "streamingmovies": streaming_movies,
 
-    # Other service features
-    service_values = {
-        "OnlineSecurity": online_security,
-        "OnlineBackup": online_backup,
-        "DeviceProtection": device_protection,
-        "TechSupport": tech_support,
-        "StreamingTV": streaming_tv,
-        "StreamingMovies": streaming_movies
+        "contract": contract,
+        "paperless_billing": paperless_billing,
+        "payment_method": payment_method
     }
 
-    for feature, value in service_values.items():
-        customer[f"{feature}_No internet service"] = int(
-            value == "No internet service"
-        )
-        customer[f"{feature}_Yes"] = int(value == "Yes")
+    # Convert customer details into model features
+    customer_df = encode_customer(customer, feature_names)
 
-    # Account features
-    customer["Contract_One year"] = int(contract == "One year")
-    customer["Contract_Two year"] = int(contract == "Two year")
-    customer["PaperlessBilling_Yes"] = int(
-        paperless_billing == "Yes"
-    )
-    customer["PaymentMethod_Credit card (automatic)"] = int(
-        payment_method == "Credit card (automatic)"
-    )
-    customer["PaymentMethod_Electronic check"] = int(
-        payment_method == "Electronic check"
-    )
-    customer["PaymentMethod_Mailed check"] = int(
-        payment_method == "Mailed check"
-    )
+    # Generate prediction
+    prediction = model.predict(customer_df)[0]
+    probability = model.predict_proba(customer_df)[0][1]
 
-    # Arrange features in the exact training order
-    customer_df = pd.DataFrame(
-        [[customer[feature] for feature in feature_names]],
-        columns=feature_names
+    st.subheader("Prediction Result")
+
+    if prediction == 1:
+        st.error("Prediction: Likely to churn")
+    else:
+        st.success("Prediction: Unlikely to churn")
+
+    st.metric("Estimated churn probability", f"{probability:.2%}")
+    st.progress(float(probability))
+
+    st.caption(
+        "This result is a model estimate, not a guarantee of customer behavior."
     )
 
     # Generate prediction
