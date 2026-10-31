@@ -43,6 +43,12 @@ def test_encoder_creates_30_features():
         "paperless_billing": "Yes",
         "payment_method": "Electronic check"
     }
+
+    result = encode_customer(customer, feature_names)
+
+    assert isinstance(result, pd.DataFrame)
+    assert result.shape == (1, 30)
+    assert list(result.columns) == feature_names
 def test_encoder_converts_customer_values_correctly():
     feature_names = [
         "SeniorCitizen", "tenure", "MonthlyCharges", "TotalCharges",

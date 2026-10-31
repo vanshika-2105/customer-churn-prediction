@@ -2,7 +2,7 @@
 import joblib
 import pandas as pd
 from pathlib import Path
-
+from src.feature_encoder import encode_customer
 # Load the trained model and feature names
 model = joblib.load("models/logistic_regression_model.joblib")
 
@@ -93,69 +93,34 @@ payment_method = ask_choice(
 monthly_charges = float(input("Monthly charges: "))
 total_charges = float(input("Total charges: "))
 
-# Convert the answers into the same features used during training
+# Store customer answers in the format expected by the encoder
 customer = {
-    "SeniorCitizen": senior_citizen,
+    "senior_citizen": "Yes" if senior_citizen == 1 else "No",
     "tenure": tenure,
-    "MonthlyCharges": monthly_charges,
-    "TotalCharges": total_charges,
-    "gender_Male": int(gender == "Male"),
-    "Partner_Yes": int(partner == "Yes"),
-    "Dependents_Yes": int(dependents == "Yes"),
-    "PhoneService_Yes": int(phone_service == "Yes"),
-    "MultipleLines_No phone service": int(
-        multiple_lines == "No phone service"
-    ),
-    "MultipleLines_Yes": int(multiple_lines == "Yes"),
-    "InternetService_Fiber optic": int(
-        internet_service == "Fiber optic"
-    ),
-    "InternetService_No": int(internet_service == "No"),
-    "OnlineSecurity_No internet service": int(
-        online_security == "No internet service"
-    ),
-    "OnlineSecurity_Yes": int(online_security == "Yes"),
-    "OnlineBackup_No internet service": int(
-        online_backup == "No internet service"
-    ),
-    "OnlineBackup_Yes": int(online_backup == "Yes"),
-    "DeviceProtection_No internet service": int(
-        device_protection == "No internet service"
-    ),
-    "DeviceProtection_Yes": int(device_protection == "Yes"),
-    "TechSupport_No internet service": int(
-        tech_support == "No internet service"
-    ),
-    "TechSupport_Yes": int(tech_support == "Yes"),
-    "StreamingTV_No internet service": int(
-        streaming_tv == "No internet service"
-    ),
-    "StreamingTV_Yes": int(streaming_tv == "Yes"),
-    "StreamingMovies_No internet service": int(
-        streaming_movies == "No internet service"
-    ),
-    "StreamingMovies_Yes": int(streaming_movies == "Yes"),
-    "Contract_One year": int(contract == "One year"),
-    "Contract_Two year": int(contract == "Two year"),
-    "PaperlessBilling_Yes": int(paperless_billing == "Yes"),
-    "PaymentMethod_Credit card (automatic)": int(
-        payment_method == "Credit card (automatic)"
-    ),
-    "PaymentMethod_Electronic check": int(
-        payment_method == "Electronic check"
-    ),
-    "PaymentMethod_Mailed check": int(
-        payment_method == "Mailed check"
-    )
+    "monthly_charges": monthly_charges,
+    "total_charges": total_charges,
+    "gender": gender,
+    "partner": partner,
+    "dependents": dependents,
+    "phone_service": phone_service,
+    "multiple_lines": multiple_lines,
+    "internet_service": internet_service,
+    "online_security": online_security,
+    "online_backup": online_backup,
+    "device_protection": device_protection,
+    "tech_support": tech_support,
+    "streamingtv": streaming_tv,
+    "streamingmovies": streaming_movies,
+    "contract": contract,
+    "paperless_billing": paperless_billing,
+    "payment_method": payment_method
 }
 
-# Arrange the features in the exact training order
-customer_df = pd.DataFrame([customer]).reindex(columns=feature_names)
-
+# Encode customer data using the reusable encoder
+customer_df = encode_customer(customer, feature_names)
 # Predict churn
 prediction = model.predict(customer_df)[0]
 churn_probability = model.predict_proba(customer_df)[0][1]
-
 print("\nPrediction Result")
 print("-----------------")
 print(
